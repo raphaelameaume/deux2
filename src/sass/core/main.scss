@@ -1,0 +1,193 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 700;
+
+    background-color: black;
+
+    overflow: hidden;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+#root {
+    height: 100%;
+}
+
+#canvas {
+	position: absolute;
+	top: 0;
+	left: 0;
+	
+	width: 100%;
+	height: 100%;
+}
+
+.ui {
+    position: relative;
+
+    width: 100%;
+    max-width: 960px;
+    height: 100%;
+    margin: 0 auto;
+
+    color: white;
+}
+
+.ui__section {
+    position: absolute;
+    top: 0;
+    left: 0;
+        
+    display: flex;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.intro__logo {
+    position: relative;
+
+    display: flex;
+    justify-content: center;
+    margin-bottom: 64px;
+}
+
+.intro__baseline {
+    position: absolute;
+    right: 14%;
+    bottom: 23%;
+
+    font-size: 22px;
+
+    transform: rotate(-12deg) skewX(-20deg);
+}
+
+.intro__action {
+    position: absolute;
+    bottom: 64px;
+    left: 0;
+
+    width: 100%;
+
+    text-align: center;
+}
+
+$skew: -20deg;
+
+.action__label {
+    position: relative;
+    
+    display: inline-block;
+    // display: none;
+    padding: 14px 40px;
+
+    font-size: 18px;
+    text-transform: uppercase;
+    line-height: 140%;
+
+    &:before, &:after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+
+        width: 100%;
+        height: 100%;
+
+        transform: skewX($skew);
+    }
+
+    &:before {
+        // background: white;
+        // transform: skewX($skew) scaleX(0.01);
+        // transform-origin: 0;
+
+        // transition: transform 0.3s ease;
+    }
+
+    &:after {
+        // background: linear-gradient(to right, rgba(255,255,255,0.0) 0%, rgba(255,255,255,0.3) 50%,rgba(255,255,255,0) 100%);
+    }
+
+    &:hover {
+        &:before {
+            transform: skewX($skew) scaleX(1);
+        }    
+    }
+
+    .action__fill {
+        position: absolute;
+        top: 0;
+        left: 0;
+
+        opacity: 0;
+
+        width: 100%;
+        height: 100%;
+
+        background: white;
+        transform-origin: 0;
+        transform: skewX($skew) scaleX(0.01);
+    }
+    
+}
+
+.ui__section--tuto {
+    opacity: 0;
+    transform: scale(0.8);
+}
+
+.tuto__line {
+    display: flex;
+    margin: 32px 54px;
+
+    align-items: center;
+
+    &:first-of-type {
+        justify-content: flex-start;
+    }
+
+    &:last-of-type {
+        justify-content: flex-end;
+    }
+}
+
+.tuto__title {
+    margin-bottom: 32px;
+
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.tuto__key {
+    position: relative;
+
+    width: 55px;
+    height: 55px;
+    margin: 0 7px;
+
+    border: 2px solid white;
+
+    &:first-of-type {
+        margin-left: 22px;
+    }
+
+    &:last-of-type {
+        margin-right: 22px;
+    }
+}
+
+.tuto__key--space {
+    width: 360px;
+}
+
+.tuto__letter {
+    display: block;
+    margin: 8px;
+
+    font-size: 26px;
+    line-height: 26px;
+}
