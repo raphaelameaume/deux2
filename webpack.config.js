@@ -2,7 +2,7 @@ module.exports = {
      entry: './src/js/custom/Main.js',
      devtool: 'inline-source-map',
      output: {
-         path: __dirname + "/public/js",
+         path: __dirname + "/js",
          filename: 'build.js'
      },
       module: {

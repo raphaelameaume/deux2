@@ -19,7 +19,7 @@ class SoundManager {
         this.isSpaceDown = false;
         this.started = false;
 
-        this.assets = '/assets/sounds';
+        this.assets = 'assets/sounds';
         this.sources = {
             intro: 'intro.mp3',
             // xp: 'debug.mp3',
