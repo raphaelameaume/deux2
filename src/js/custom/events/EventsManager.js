@@ -30,7 +30,7 @@ class EventsManager {
      */
     static on ( event, fn ) {
 
-        console.log('EventsManager :: ON ::', event);
+        // console.log('EventsManager :: ON ::', event);
 
         if(!EventsManager.eventsList) EventsManager.eventsList = {};
 

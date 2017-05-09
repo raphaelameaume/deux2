@@ -16,24 +16,6 @@ class Top extends AbstractFace {
         this.visibilityToggler = '8';
         this.visibilityHider = '3';
         this.visibilityShower = '1';
-
-        this.togglePosition = false;
-    }
-
-    updatePosition () {
-        this.togglePosition = !this.togglePosition;
-
-        const to = this.togglePosition ? this.position.y * 0.5 : this.position.y * 2;
-
-        TweenMax.to(this.position, this.duration, { y: to, ease: this.ease });
-    }
-
-    onStart () {
-        super.onStart();
-
-        this.show();
-        this.setBlackMode();
-        this.updateDivisions(this.startDivisions.x, this.startDivisions.y, false);
     }
 }
 

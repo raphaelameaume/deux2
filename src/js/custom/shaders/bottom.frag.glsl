@@ -71,16 +71,22 @@ void main() {
 
     vec4 color = vec4(outgoingLight, diffuseColor.a );
 
-    float posX = vPosition.x * uStripeOrientation.x + vPosition.y * uStripeOrientation.y + uTime;
+    float posX = vPosition.x * uStripeOrientation.x + vPosition.y * uStripeOrientation.y;
     float posY = vPosition.x * uStripeOrientation.y + vPosition.y * uStripeOrientation.x;
 
     float squareX = ( uSquare.x * uStripeOrientation.x + uSquare.x * uStripeOrientation.y );
     float squareY = ( uSquare.y * uStripeOrientation.x + uSquare.y * uStripeOrientation.y );
 
-    float absX = floor(-cos((M_PI * squareX * posX) / uWidth)) + 1.;
-    float absY = floor(-cos((M_PI * squareY * posY) / uWidth)) + 1.;
+    float absX = floor(-cos((M_PI * uSquare.x * vPosition.x) / uHeight)) + 1.;
+    float absY = floor(-cos((M_PI * uSquare.y * vPosition.y) / uWidth)) + 1.;
 
-    if ( absX > 0.0 || absY > 0. ) {
+    // if ( absX > 0.0 || absY > 0.0 ) {
+    //    color = vec4(vec3(1.0 - uInvert), diffuseColor.a);
+    // } else {
+    //     color = vec4(vec3(0.0 + uInvert), diffuseColor.a);  
+    // }
+
+    if ( absX > 0. || absY > 0. ) {
        color = vec4(vec3(1.0 - uInvert), diffuseColor.a);
     } else {
         color = vec4(vec3(0.0 + uInvert), diffuseColor.a);  

@@ -79,7 +79,7 @@ void main() {
     float absX = floor(-cos((uTime * 0.1 + M_PI * uSquare.x * ( ( vUv.x + uProgress + 0.15 ) * 2. - 1. ) * 0.5))) + 1.;
     float absY = floor(-cos((M_PI * uSquare.y * ( vUv.y * 2. - 1. ) * 0.5))) + 1.;
 
-    if ( absX > 0.0 || absY > 0. ) {
+    if ( absX > 0. || absY > 0. ) {
        color = vec4(vec3(1.0 - uInvert), diffuseColor.a);
     } else {
         color = vec4(vec3(0.0 + uInvert), diffuseColor.a);  

@@ -22,7 +22,6 @@ class SoundManager {
         this.assets = 'assets/sounds';
         this.sources = {
             intro: 'intro.mp3',
-            // xp: 'debug.mp3',
             xp: 'xp.mp3',
         };
 
@@ -36,8 +35,11 @@ class SoundManager {
         // this.initGui();
 
         const lowKick = new Range('lowKick', [110, 130], 600, Events.SOUNDS.LOWKICK);
+        const middleKick = new Range('middleKick', [270, 290], 600, Events.SOUNDS.MIDDLEKICK, 0.3);
+        const tremolo = new Range('tremolo', [480, 520], 100, Events.SOUNDS.TREMOLO);
+        const highKick = new Range('highKick', [1500, 3500], 800, Events.SOUNDS.HIGHKICK, 0.5);
 
-        this.ranges = [lowKick];
+        this.ranges = [lowKick, highKick, tremolo, middleKick];
 
         EventsManager.on(Events.SOUNDS.START, this.start);
         EventsManager.on(Events.KEYBOARD.SPACEHOLD, this.onSpaceHold);
@@ -112,10 +114,10 @@ class SoundManager {
     }
 
     onSpaceHold ( data ) {
-        const { progress } = data;
+        const { volume } = data;
         const { audio } = this.players['intro'];
 
-        audio.volume = Math.max(0, Math.min(progress * 0.5, 1));
+        audio.volume = Math.max(0, Math.min(volume * 0.5, 1));
     }
 
     onSpaceDown () {

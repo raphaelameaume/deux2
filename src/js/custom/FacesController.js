@@ -1,6 +1,9 @@
 import Events from './events/Events';
 import EventsManager from './events/EventsManager';
 import randomFromArray from './utils/randomFromArray';
+import lucky from './utils/lucky';
+import map from './utils/map';
+import debounce from './utils/debounce';
 
 class FacesController {
 
@@ -8,17 +11,32 @@ class FacesController {
         this.container = new THREE.Object3D();
         this.faces = {};
         this.divisions = {
-            x: this.generateDivisions(1, 125),
-            y: this.generateDivisions(1, 25),
+            x: this.generateDivisions(5, 43),
+            y: this.generateDivisions(5, 43),
             lastX: 0,
             lastY: 0,
         };
 
+        this.time = 0.0;
+        this.speed = 0.0;
+        this.speedContainer = 0.0;
+        this.factor = 1.0;
+        this.isSpaceDown = false;
+        this.firstSpaceUp = false;
+        this.highkicked = 0;
+
         // on events
         this.onLowKick = ::this.onLowKick;
+        this.onMiddleKick = ::this.onMiddleKick;
+        this.onHighKick = ::this.onHighKick;
+        this.onTremolo = ::this.onTremolo;
         this.onKeyPress = ::this.onKeyPress;
         this.onUIHidden = ::this.onUIHidden;
         this.onSoundEnd = ::this.onSoundEnd;
+        this.onSpaceUp = ::this.onSpaceUp;
+        this.onSpaceDown = ::this.onSpaceDown;
+        this.onStart = ::this.onStart;
+        this.onSpaceHold = ::this.onSpaceHold;
 
         // black modes
         this.blackModeVertical = ::this.blackModeVertical;
@@ -26,28 +44,56 @@ class FacesController {
         this.blackModeTunnelTop = ::this.blackModeTunnelTop;
         this.blackModeTunnelBottom = ::this.blackModeTunnelBottom;
         this.blackModeBottom = ::this.blackModeBottom;
+        this.blackModeFull = ::this.blackModeFull;
 
         this.blackModes = [
             this.blackModeVertical,
             this.blackModeHorizontal,
-            this.blackModeTunnelTop,
-            this.blackModeTunnelBottom,
-            this.blackModeBottom,
+            // this.blackModeTunnelTop,
+            // this.blackModeTunnelBottom,
+            // this.blackModeBottom,
+            this.blackModeFull,
         ];
 
         // reactions
         this.updateDivisions = :: this.updateDivisions;
         this.setBlackMode = ::this.setBlackMode;
+        this.changeScale = ::this.changeScale;
 
         this.reactions = [
             this.updateDivisions,
-            this.setBlackMode
+            this.setBlackMode,
+            this.changeScale
+        ];
+
+        this.changeScaleX = ::this.changeScaleX;
+        this.changeScaleY = ::this.changeScaleY;
+        this.changeScaleBoth = ::this.changeScaleBoth;
+
+        // scales
+        this.scalings = [
+            this.changeScaleY,
+            this.changeScaleX,
+            this.changeScaleBoth,
         ];
 
         EventsManager.on(Events.KEYBOARD.KEYPRESS, this.onKeyPress);
         EventsManager.on(Events.SOUNDS.LOWKICK, this.onLowKick);
+        EventsManager.on(Events.SOUNDS.MIDDLEKICK, this.onMiddleKick);
+        EventsManager.on(Events.SOUNDS.HIGHKICK, this.onHighKick);
+        EventsManager.on(Events.SOUNDS.TREMOLO, this.onTremolo);
         EventsManager.on(Events.SOUNDS.END, this.onSoundEnd);
         EventsManager.on(Events.UI.HIDDEN, this.onUIHidden);
+        EventsManager.on(Events.KEYBOARD.SPACEDOWN, this.onSpaceDown);
+        EventsManager.on(Events.KEYBOARD.SPACEUP, this.onSpaceUp);
+        EventsManager.on(Events.KEYBOARD.SPACEHOLD, this.onSpaceHold);
+        EventsManager.on(Events.XP.START, this.onStart);
+
+        // this.updateDivisions = debounce(this.updateDivisions, 400);
+        // this.changeScale = debounce(this.changeScale, 400);
+        // this.setBlackMode = debounce(this.setBlackMode, 400);
+
+        this.updateDivisions();
     }
 
     register ( id, face ) {
@@ -72,20 +118,22 @@ class FacesController {
     }
 
     updateDivisions () {
-        const possibleDivisionX = this.findDivisions(this.divisions.x, this.divisions.lastX, 12);
+        const possibleDivisionX = this.findDivisions(this.divisions.x, this.divisions.lastX, 3);
         const rdmXIndex = Math.floor(Math.random() * possibleDivisionX.length);
         const divisionX = possibleDivisionX[rdmXIndex];
 
         this.divisions.lastX = this.divisions.x.indexOf(divisionX);
 
-        const possibleDivisionY = this.findDivisions(this.divisions.y, this.divisions.lastY, 4);
+        const possibleDivisionY = this.findDivisions(this.divisions.y, this.divisions.lastY, 3);
         const rdmYIndex = Math.floor(Math.random() * possibleDivisionY.length);
         const divisionY = possibleDivisionY[rdmYIndex];
 
         this.divisions.lastY = this.divisions.y.indexOf(divisionY);
 
+        const tl = new TimelineMax();
+
         Object.keys(this.faces).map( key => {
-            this.faces[key].updateDivisions(divisionX, divisionY);
+            tl.add(this.faces[key].updateDivisions(divisionX, divisionY), 0);
         });
     }
 
@@ -97,7 +145,7 @@ class FacesController {
 
     findDivisions ( all, current, range ) {
         const divisions = all.map( ( division, index) => {
-            if ( index > current - 4 && index < current + 4 ) {
+            if ( index > current - range && index < current + range ) {
                 return division;
             }
 
@@ -110,7 +158,7 @@ class FacesController {
     }
 
     onKeyPress ( data ) {
-        if ( !window.uiHidden || window.soundEnded ) {
+        if ( !window.started || window.soundEnded ) {
             return;
         }
 
@@ -125,21 +173,61 @@ class FacesController {
         }
 
         if ( key === 'u') {
-            this.updateDivisions();
+            this.changeScale();
         }
 
         if ( key === 'x' ) {
-            this.setBlackMode();
+            this.speedContainer = !this.speedContainer;
         }
     }
 
     onLowKick () {
-        if ( !window.uiHidden ) {
+        if ( !window.started ) {
             return;
         }
 
-        const reaction = randomFromArray(this.reactions);
-        reaction();
+        if ( Math.random() > 0.5 ) {
+            this.updateDivisions();
+        } else {
+            this.updateDivisions();
+            this.changeScale();
+        }
+    }
+
+    onHighKick () {
+        if ( !window.started ) {
+            return;
+        }
+
+        this.speedContainer = 1.1;
+
+        if ( this.highkicked % 2 === 0 ) {
+            this.factor = -this.factor;
+        } 
+
+        this.highkicked++;
+
+        this.divisions = {
+            x: this.generateDivisions(3, 5),
+            y: this.generateDivisions(7, 13),
+            lastX: 0,
+            lastY: 0,
+        };
+
+        this.updateDivisions();
+        this.setBlackMode();
+        this.changeScale();
+
+        // const reaction = randomFromArray(this.reactions);
+        // reaction();
+    }
+
+    onMiddleKick () {
+        // console.log('MIDDLEKICK');
+    }
+
+    onTremolo () {
+        // console.log('Tremoloooo');
     }
 
     onSoundEnd ( data ) {
@@ -151,6 +239,9 @@ class FacesController {
                 this.reset();
             }});
 
+            this.speed = 0.0;
+            this.speedContainer = 0.0;
+            this.time = 0.0;
 
             Object.keys(this.faces).map( key => {
                 tl.add(this.faces[key].onEnd(), 0);
@@ -159,87 +250,101 @@ class FacesController {
     }
 
     setBlackMode () {
-        Object.keys(this.faces).map( key => {
-            this.faces[key].setBlackMode();
-        });
-        
         const blackMode = randomFromArray(this.blackModes);
-        blackMode();
+        const options = blackMode();
+
+        const tl = new TimelineMax();
+
+        Object.keys(this.faces).map( key => {
+            if ( options[key] === 0 ) {
+                tl.add(this.faces[key].hide(), 0);
+            } else {
+                tl.add(this.faces[key].show(), 0);
+            }
+
+            tl.add(this.faces[key].setBlackMode(), 0);
+        });
     }
 
     blackModeVertical () {
-        this.faces['left'].hide();
-        this.faces['right'].hide();
-        this.faces['top'].show();
-        this.faces['bottom'].show();
+        return {
+            top: 1,
+            right: 0,
+            bottom: 1,
+            left: 0,
+        };
     }
 
     blackModeHorizontal () {
-        this.faces['left'].show();
-        this.faces['right'].show();
-        this.faces['top'].hide();
-        this.faces['bottom'].hide();
+        return {
+            top: 0,
+            right: 1,
+            bottom: 0,
+            left: 1,
+        };
     }
 
     blackModeTunnelTop () {
-        this.faces['left'].show();
-        this.faces['right'].show();
-        this.faces['top'].show();
-        this.faces['bottom'].hide();
+        return {
+            top: 1,
+            right: 1,
+            bottom: 0,
+            left: 1,
+        };
     }
 
     blackModeTunnelBottom () {
-        this.faces['left'].show();
-        this.faces['right'].show();
-        this.faces['top'].hide();
-        this.faces['bottom'].show();
+        return {
+            top: 0,
+            right: 1,
+            bottom: 1,
+            left: 1,
+        };
     }
 
     blackModeBottom () {
-        this.faces['left'].hide();
-        this.faces['right'].hide();
-        this.faces['top'].hide();
-        this.faces['bottom'].show();
+        return {
+            top: 0,
+            right: 0,
+            bottom: 1,
+            left: 0,
+        };
+    }
+
+    blackModeFull () {
+        return {
+            top: 1,
+            right: 1,
+            bottom: 1,
+            left: 1,
+        };
     }
 
     changeScale () {
-        const rdm = Math.random();
+        const scale = randomFromArray(this.scalings);
 
-        // const face = this.faces['bottom'];
+        scale();
+    }
 
-        // const to = face.uniforms['uSquare'].value.y * 2;
+    changeScaleX () {
+        const to = Math.max(0.5, Math.floor(Math.random() * 25) * 0.1);
 
-        // TweenMax.to(face.scale, 0.3, { y: 2, ease: this.ease });
-        // TweenMax.to(this.faces['left'].uniforms['uSquare'].value, 0.3, { y: to, ease: this.ease });
-        // TweenMax.to(this.faces['right'].uniforms['uSquare'].value, 0.3, { y: to, ease: this.ease });
+        TweenMax.to(this.container.scale, 0.3, { x: to, ease: Expo.easeOut });
+    }
 
-        // const toPos = this.faces['left'].position.x * 2;
-        // TweenMax.to(this.faces['left'].position, 0.3, { x: toPos, ease: this.ease });
+    changeScaleY () {
+        const to = Math.max(0.5, Math.floor(Math.random() * 25) * 0.1);
 
-        // const toPosRight = this.faces['right'].position.x * 2;
-        // TweenMax.to(this.faces['right'].position, 0.3, { x: toPosRight, ease: this.ease });
+        TweenMax.to(this.container.scale, 0.3, { y: to, ease: Expo.easeOut });
+    }
 
-        // const scale = Math.floor(Math.random() * 5) / 10 + 0.5;
+    changeScaleBoth () {
+        const to = Math.max(0.5, Math.floor(Math.random() * 25) * 0.1);
 
-        // TweenMax.to(this.container.scale, 0.3, { x: scale, y: scale, ease: Expo.easeOut });
-
-        // if ( rdm < 0.33 ) {
-        //     this.faces['left'].updatePosition();
-        //     this.faces['right'].updatePosition();
-        // } else if ( rdm < 0.66 ) {
-        //     this.faces['top'].updatePosition();
-        //     this.faces['bottom'].updatePosition();
-        // } else {
-        //     this.faces['top'].updatePosition();
-        //     this.faces['bottom'].updatePosition();
-        //     this.faces['left'].updatePosition();
-        //     this.faces['right'].updatePosition();
-        // }
+        TweenMax.to(this.container.scale, 0.3, { x: to, y: to, ease: Expo.easeOut });
     }
 
     onUIHidden () {
-        console.log('onUIHidden');
-
         this.faces['left'].show();
         this.faces['right'].show();
 
@@ -253,6 +358,58 @@ class FacesController {
 
         this.divisions.lastX = 0;
         this.divisions.lastY = 0;
+        this.time = 0.0;
+        this.speed = 0.0;
+        this.speedContainer = 0.0;
+        this.factor = 1.0;
+        this.isSpaceDown = false;
+        this.firstSpaceUp = false;
+        this.highkicked = 0;
+    }
+
+    update () {
+        this.time += this.factor * this.speed * 0.1;
+        this.container.rotation.z += this.factor * this.speedContainer * 0.005;
+
+        this.faces['left'].update(this.time);
+        this.faces['right'].update(this.time);
+        this.faces['bottom'].update(this.time);
+        this.faces['top'].update(this.time);
+    }
+
+    onSpaceUp () {
+        if ( window.started && this.isSpaceDown && this.firstSpaceUp ) {
+            this.isSpaceDown = false;
+
+            this.factor = -this.factor;
+        }
+
+        if ( window.started ) {
+            this.firstSpaceUp = true;
+        }
+
+    }
+
+    onSpaceDown () {
+        if ( window.started && !this.isSpaceDown ) {
+            this.isSpaceDown = true;
+        }
+    }
+
+    onSpaceHold ( data ) {
+        const { progress } = data;
+
+        const uProgress = map(progress, 0, 1, 0, 1.8);
+
+        Object.keys(this.faces).map( key => {
+            this.faces[key].onSpaceHold(uProgress);
+        });
+    }
+
+    onStart () {
+        // this.speed = 12.0;
+
+        TweenMax.to(this, 1, { speed: 12, ease: Expo.easeInOut });
     }
 }
 

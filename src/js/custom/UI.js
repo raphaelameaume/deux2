@@ -10,6 +10,7 @@ class UI {
         this.$actionFill = this.$wrapper.querySelector('.action__fill');
         this.$tuto = document.querySelector('.ui__section--tuto');
         this.$credits = document.querySelector('.ui__section--credits');
+        this.$creditItems = document.querySelectorAll('.credits__item');
 
         this.now = Date.now();
         this.maxTime = 3000;
@@ -20,25 +21,25 @@ class UI {
         this.maxFill = 1;
         this.fill = this.minFill;
 
-        this.maxScale = 1.5;
-        this.minScale = 1;
-        this.scale = this.minScale;
-        this.opacity = 1;
+        this.volume = 0;
         this.progress = 0;
         this.resetted = false;
         this.isDown = false;
 
+        this.duration = 4;
+
         this.onComplete = ::this.onComplete;
 
-        this.tl = new TimelineMax({ paused: true });
-        this.tl.to(this, 1.5, {
-            opacity: -1,
-            progress: 1,
-            scale: this.maxScale,
-            fill: this.maxFill,
-            ease: Linear.easeNone,
-            onComplete: this.onComplete
-        });
+        this.tl = new TimelineMax({ paused: true, onComplete: this.onComplete });
+        this.tl.to(this, this.duration, { volume: 1, ease: Linear.easeNone}, 0);
+        this.tl.to(this.$action, this.duration, { css: { opacity: 0 }, ease: Linear.easeNone }, 0);
+        this.tl.to(this.$logo, this.duration * 0.25, { opacity: 0, scale: 1.5, ease: Linear.easeNone }, 0);
+        this.tl.to(this, this.duration * 0.25, { progress: 1, ease: Expo.easeInOut }, this.duration * 0.25);
+        this.tl.to(this.$tuto, this.duration * 0.25, { css: { opacity: 1 }, ease: Linear.easeNone }, this.duration * 0.5);
+        this.tl.to(this.$tuto, this.duration * 0.5, { css: { scale: 1.5 }, ease: Linear.easeNone }, this.duration * 0.5);
+        this.tl.to(this.$tuto, this.duration * 0.25, { css: { opacity: 0 }, ease: Linear.easeNone }, this.duration);
+        this.tl.set(this, { progress: 0 }, this.duration);
+        this.tl.to(this, this.duration * 0.25, { progress: 0.44, ease: Expo.easeInOut }, this.duration);
 
         this.onKeyDown = ::this.onKeyDown;
         this.onKeyUp = ::this.onKeyUp;
@@ -61,20 +62,7 @@ class UI {
 
     update () {
         if ( !this.isCompleted ) {
-            EventsManager.emit(Events.KEYBOARD.SPACEHOLD, { progress: this.progress });
-        }
-
-        if ( !this.isCompleted ) {
-            if ( !this.resetted ) {
-                this.$actionFill.style.transform = this.$actionFill.style.WebkitTransform = `skewX(-20deg) scaleX(${this.fill})`;
-                this.$logo.style.transform = this.$logo.style.WebkitTransform = `scale(${this.scale})`;
-                this.$logo.style.opacity = this.opacity;
-                this.$action.style.opacity = this.opacity;
-            } else {
-                // scale credits
-                this.$credits.style.transform = this.$credits.style.WebkitTransform = `scale(${this.scale})`;
-                this.$credits.style.opacity = this.opacity;
-            }
+            EventsManager.emit(Events.KEYBOARD.SPACEHOLD, { progress: this.progress, volume: this.volume });
         }
     }
 
@@ -97,7 +85,7 @@ class UI {
     onSpaceUp () {
         if ( !window.started && this.isDown && !this.isCompleted ) {
             this.isDown = false;
-            this.tl.timeScale(3);
+            this.tl.timeScale(6);
             this.tl.reverse();
         }
     }
@@ -111,30 +99,13 @@ class UI {
     }
 
     onComplete () {
-        this.isCompleted = true;
+        TweenMax.set(this.$creditItems, { css: { scale: 0.8, opacity: 0 }});
+        TweenMax.set(this.$credits, { css: { scale: 1, opacity: 1 }})
 
-        if ( this.resetted ) {
-            EventsManager.emit(Events.UI.HIDDEN);
+        if ( !this.isCompleted ) {
+            this.isCompleted = true;
+            EventsManager.emit(Events.XP.START);
         }
-
-        this.$actionFill.style.transformOrigin = '100%';
-
-        EventsManager.emit(Events.XP.START);
-
-        if ( !this.resetted ) {
-            this.displayTutorial();
-        }
-    }
-
-    displayTutorial () {
-        const duration = 4;
-
-        const tl = new TimelineMax({ onComplete: () => {
-            EventsManager.emit(Events.UI.HIDDEN);
-        }});
-        tl.fromTo(this.$tuto, 0.3, { css: { scale: 0.8 }}, { css: { scale: this.maxScale }, ease: Linear.easeNone }, 0);
-        tl.to(this.$tuto, duration * 0.5, { css: { opacity: 1 }, ease: Linear.easeNone }, 0);
-        tl.to(this.$tuto, duration * 0.5, { css: { opacity: 0 }, ease: Linear.easeNone }, duration * 0.5);
     }
 
     displayCredits () {
@@ -144,31 +115,21 @@ class UI {
         const tl = new TimelineMax({ onComplete: () => {
             this.reset();
         }});
-        tl.fromTo(this.$credits, duration, { css: { scale: 0.9 }}, { css: { scale: 1.0 }, ease: Expo.easeOut }, 0);
-        tl.to(this.$credits, duration, { css: { opacity: 1 }, ease: Expo.easeOut }, 0);
+        tl.staggerFromTo(Array.from(this.$creditItems), duration, { css: { scale: 0.8, opacity: 0 }}, { css: { scale: 1.0, opacity: 1 }, ease: Expo.easeOut }, duration * 0.1, 0);
     }
 
     reset () {
-        this.progress = 0;
         this.resetted = true;
+        this.progress = 0;
+        this.volume = 0;
+        this.isDown = false;
+        this.duration = 2;
         this.isCompleted = false;
 
-        this.maxScale = 1.5;
-        this.minScale = 1;
-        this.scale = this.minScale;
-        this.opacity = 1;
-        this.progress = 0;
-        this.isDown = false;
-
-        this.tl = new TimelineMax({ paused: true });
-        this.tl.to(this, 1.5, {
-            opacity: -1,
-            progress: 1,
-            scale: this.maxScale,
-            fill: this.maxFill,
-            ease: Linear.easeNone,
-            onComplete: this.onComplete
-        });
+        this.tl = new TimelineMax({ paused: true, onComplete: this.onComplete });
+        this.tl.to(this, this.duration, { volume: 1, ease: Linear.easeNone}, 0);
+        this.tl.to(this.$credits, this.duration * 0.5, { opacity: 0, scale: 1.5, ease: Linear.easeNone }, 0);
+        this.tl.to(this, this.duration * 0.5, { progress: 1, ease: Expo.easeInOut }, this.duration * 0.5);
     }
 
     onEndXP () {

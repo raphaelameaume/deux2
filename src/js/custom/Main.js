@@ -86,7 +86,7 @@ class App {
 
 		this.width = window.width = 60;
 		this.height = window.height = 60;
-		this.length = window.length = 100;
+		this.length = window.length = 600;
 
         this.scene = new THREE.Scene();
         this.scene.fog = new THREE.Fog(0x000000, 0.8, this.length * .98 );
@@ -121,10 +121,11 @@ class App {
 
     onStart () {
         window.started = true;
+        window.uiHidden = true;
     }
 
     onUIHidden () {
-        window.uiHidden = true;
+        
     }
 
     onSoundEnd ( data ) {
@@ -188,10 +189,9 @@ class App {
 		// this.background.position.z = -this.length * 0.5;
   //       this.facesController.register('background', this.background);
 
-		this.facesContainer.position.z = -this.length * 0.5;
-        this.facesContainer.scale.x = this.facesContainer.scale.y =  0.1;
+		this.facesController.container.position.z = -this.length * 0.5;
 
-		this.scene.add(this.facesContainer);
+		this.scene.add(this.facesController.container);
 	}
 
     rotate () {
@@ -202,11 +202,7 @@ class App {
 	update () {
         this.ui.update();
         this.soundManager.update();
-
-		this.left.update();
-		this.right.update();
-		this.bottom.update();
-		this.top.update();
+        this.facesController.update();
 
 		this.composer.reset();
 		this.composer.render(this.scene, this.camera);
