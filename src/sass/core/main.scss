@@ -85,9 +85,19 @@ body {
 .intro__logo {
     position: relative;
 
-    display: flex;
-    justify-content: center;
     margin-bottom: 64px;
+
+    pointer-events: none;
+    
+    img {
+        display: block;
+        width: 100%;
+        margin: 0 auto;
+
+        @media screen and (max-width: 1280px) {
+            width: 80%;
+        }
+    }
 }
 
 .intro__baseline {
@@ -98,16 +108,34 @@ body {
     font-size: 22px;
 
     transform: rotate(-12deg) skewX(-20deg);
+
+    @media screen and (max-width: 960px) {
+        font-size: 18px;
+    }
+
+    @media screen and ( max-width: 750px ) {
+        font-size: 15px;
+    }
+
+    @media screen and ( max-width: 550px ) {
+        font-size: 13px;
+    }
+
+    @media screen and ( max-width: 400px ) {
+        font-size: 10px;
+    }
 }
 
 .intro__action {
     position: absolute;
-    bottom: 14%;
+    bottom: 16%;
     left: 0;
 
     width: 100%;
 
     text-align: center;
+
+    pointer-events: none;
 }
 
 $skew: -20deg;
@@ -190,13 +218,22 @@ $skew: -20deg;
     &:last-of-type {
         justify-content: flex-end;
     }
+
+    @media screen and ( max-width: 1280px ) {
+        margin: 25px 44px;
+    }
 }
 
 .tuto__title {
     margin-bottom: 32px;
-
+    
+    letter-spacing: 0.05em;
     text-align: center;
     text-transform: uppercase;
+
+    @media screen and ( max-width: 1280px ) {
+        margin-bottom: 25px;
+    }
 }
 
 .tuto__key {
@@ -215,10 +252,20 @@ $skew: -20deg;
     &:last-of-type {
         margin-right: 22px;
     }
+
+    @media screen and (max-width: 1280px) {
+        width: 45px;
+        height: 45px;
+        margin: 0 5px;
+    }
 }
 
 .tuto__key--space {
     width: 360px;
+
+    @media screen and ( max-width: 1280px ) {
+        width: 320px;
+    }
 }
 
 .tuto__letter {
@@ -227,6 +274,11 @@ $skew: -20deg;
 
     font-size: 26px;
     line-height: 26px;
+
+    @media screen and ( max-width: 1280px ) {
+        font-size: 18px;
+        line-height: 18px;
+    }
 }
 
 .ui__help {
@@ -246,5 +298,18 @@ $skew: -20deg;
     border: 3px solid white;
     border-radius: 50%;
 
-    opacity: 0;
+    // opacity: 0;
+
+    @media screen and ( max-width: 1280px ) {
+        top: 35px;
+        right: 35px;
+
+        width: 35px;
+        height: 35px;
+
+        font-size: 17px;
+        line-height: 32px;
+
+        border: 2px solid white;
+    }
 }

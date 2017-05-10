@@ -35,8 +35,10 @@
     font-size: 42px;
     font-weight: 400;
     
-    @media screen and ( max-width: 1200px ) {
-        font-size: 36px;
+    @media screen and ( max-width: 1280px ) {
+        margin: 12px 0 18px;
+
+        font-size: 30px;
     }
 }
 
@@ -65,5 +67,16 @@
         height: 10px;
 
         background: rgba(255, 255, 255, 0.5);
+    }
+
+    @media screen and ( max-width: 1280px ) {
+        font-size: 14px;
+
+        margin-top: 18px;
+
+        &:before {
+            bottom: 4px;
+            height: 7px;
+        }
     }
 }
