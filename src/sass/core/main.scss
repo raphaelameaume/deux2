@@ -35,6 +35,41 @@ body {
     color: white;
 }
 
+.ui__background {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+
+    background: rgba(0, 0, 0, 0.9);
+
+    opacity: 0;
+}
+
+.ui__progress {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+
+    width: 100%;
+    height: 4px;
+
+    .ui__progress__fill {
+        position: absolute;
+        top: 0;
+        left: 0;
+        
+        width: 100%;
+        height: 100%;
+    
+        background-color: white;
+        transform: scaleX(0);
+        transform-origin: 0 100%;
+    }
+}
+
 .ui__section {
     position: absolute;
     top: 0;
@@ -192,4 +227,24 @@ $skew: -20deg;
 
     font-size: 26px;
     line-height: 26px;
+}
+
+.ui__help {
+    position: absolute;
+    top: 45px;
+    right: 45px;
+
+    display: block;
+    width: 45px;
+    height: 45px;
+    
+    color: white;
+    font-size: 22px;
+    text-align: center;
+    line-height: 42px;
+
+    border: 3px solid white;
+    border-radius: 50%;
+
+    opacity: 0;
 }

@@ -17,6 +17,8 @@ class FacesController {
             lastY: 0,
         };
 
+        this.allowInvert = true;
+
         this.time = 0.0;
         this.speed = 0.0;
         this.speedContainer = 0.0;
@@ -24,6 +26,7 @@ class FacesController {
         this.isSpaceDown = false;
         this.firstSpaceUp = false;
         this.highkicked = 0;
+        this.lowkicked = 0;
 
         // on events
         this.onLowKick = ::this.onLowKick;
@@ -49,9 +52,9 @@ class FacesController {
         this.blackModes = [
             this.blackModeVertical,
             this.blackModeHorizontal,
-            // this.blackModeTunnelTop,
-            // this.blackModeTunnelBottom,
-            // this.blackModeBottom,
+            this.blackModeBottom,
+            this.blackModeTunnelTop,
+            this.blackModeTunnelBottom,
             this.blackModeFull,
         ];
 
@@ -101,14 +104,14 @@ class FacesController {
         this.container.add(face);
     }
 
-    generateDivisions ( min, max ) {
+    generateDivisions ( min, max, between = 4 ) {
         const divisions = [0];
 
-        for ( let i = min; i <= max; i+=4 ) {
+        for ( let i = min; i <= max; i+= between ) {
             divisions.push(i);
         }
 
-        for ( let i = max; i >= min; i-= 4 ) {
+        for ( let i = max; i >= min; i-= between ) {
             divisions.push(i);
         }
 
@@ -118,13 +121,13 @@ class FacesController {
     }
 
     updateDivisions () {
-        const possibleDivisionX = this.findDivisions(this.divisions.x, this.divisions.lastX, 3);
+        const possibleDivisionX = this.findDivisions(this.divisions.x, this.divisions.lastX, 2);
         const rdmXIndex = Math.floor(Math.random() * possibleDivisionX.length);
         const divisionX = possibleDivisionX[rdmXIndex];
 
         this.divisions.lastX = this.divisions.x.indexOf(divisionX);
 
-        const possibleDivisionY = this.findDivisions(this.divisions.y, this.divisions.lastY, 3);
+        const possibleDivisionY = this.findDivisions(this.divisions.y, this.divisions.lastY, 2);
         const rdmYIndex = Math.floor(Math.random() * possibleDivisionY.length);
         const divisionY = possibleDivisionY[rdmYIndex];
 
@@ -133,7 +136,7 @@ class FacesController {
         const tl = new TimelineMax();
 
         Object.keys(this.faces).map( key => {
-            tl.add(this.faces[key].updateDivisions(divisionX, divisionY), 0);
+            tl.add(this.faces[key].updateDivisions(divisionX, divisionY, this.allowInvert), 0);
         });
     }
 
@@ -186,12 +189,18 @@ class FacesController {
             return;
         }
 
-        if ( Math.random() > 0.5 ) {
+        const rdm = Math.random();
+
+        if ( rdm > 0.6 || !this.lowkicked ) {
             this.updateDivisions();
+        } else if ( rdm > 0.2 ) {
+             this.changeScale();
         } else {
             this.updateDivisions();
             this.changeScale();
         }
+
+        this.lowkicked++;
     }
 
     onHighKick () {
@@ -206,13 +215,18 @@ class FacesController {
         } 
 
         this.highkicked++;
+        this.allowInvert = false;
 
         this.divisions = {
-            x: this.generateDivisions(3, 5),
-            y: this.generateDivisions(7, 13),
+            x: this.generateDivisions(3, 9, 2),
+            y: this.generateDivisions(1, 13, 2),
             lastX: 0,
-            lastY: 0,
+            lastY: 2,
         };
+
+        this.blackModes = [
+            this.blackModeFull,
+        ];
 
         this.updateDivisions();
         this.setBlackMode();
@@ -356,8 +370,22 @@ class FacesController {
             this.faces[key].reset();
         });
 
-        this.divisions.lastX = 0;
-        this.divisions.lastY = 0;
+        this.divisions = {
+            x: this.generateDivisions(5, 43),
+            y: this.generateDivisions(5, 43),
+            lastX: 0,
+            lastY: 0,
+        };
+
+        this.blackModes = [
+            this.blackModeVertical,
+            this.blackModeHorizontal,
+            this.blackModeBottom,
+            this.blackModeTunnelTop,
+            this.blackModeTunnelBottom,
+            this.blackModeFull,
+        ];
+
         this.time = 0.0;
         this.speed = 0.0;
         this.speedContainer = 0.0;
@@ -365,6 +393,7 @@ class FacesController {
         this.isSpaceDown = false;
         this.firstSpaceUp = false;
         this.highkicked = 0;
+        this.allowInvert = true;
     }
 
     update () {

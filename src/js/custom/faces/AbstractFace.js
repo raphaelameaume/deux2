@@ -106,14 +106,19 @@ class AbstractFace extends THREE.Object3D {
     }
 
     invert () {
+        console.log('Invert');
+
+        const tl = new TimelineLite();
+
         if ( this.blackMode ) {
             this.blackMode = false;
-            this.show();
+            tl.add(this.show());
         }
 
         const to = this.uniforms['uInvert'].value === 1.0 ? 0. : 1.;
-
-        return TweenMax.to(this.uniforms['uInvert'], this.duration, { value: to, ease: this.ease, });
+        tl.to(this.uniforms['uInvert'], this.duration, { value: to, ease: this.ease, }, 0);
+        
+        return tl;
     }
 
     toggleVisibility () {
@@ -165,18 +170,16 @@ class AbstractFace extends THREE.Object3D {
     }
 
     hide () {
-        return TweenMax.to(this.uniforms['opacity'], this.duration, { value: 0, ease: this.ease, onComplete: () => {
-            this.uniforms['uProgress'].value = 0;
-        }});
+        return TweenMax.to(this.uniforms['opacity'], this.duration, { value: 0, ease: this.ease });
     }
 
     updateDivisions ( x, y, invert = true ) {
         const tl = new TimelineMax();
 
-        tl.to(this.uniforms['uSquare'].value, this.duration, { x: x, y: y, ease: this.ease });
+        tl.to(this.uniforms['uSquare'].value, this.duration, { x: x, y: y, ease: this.ease }, 0);
 
         if ( invert && Math.random() > 0.9) {
-            tl.add(this.invert());
+            tl.add(this.invert(), 0);
         }
 
         return tl;

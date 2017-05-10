@@ -1,7 +1,6 @@
 #define PHONG
 
 varying vec3 vViewPosition;
-varying vec3 vPosition;
 varying vec2 vUv;
 uniform float uTime;
 
@@ -51,17 +50,7 @@ void main() {
     #include <clipping_planes_vertex>
 
     vViewPosition = - mvPosition.xyz;
-
-    // if ( uTime > 0.0 ) {
-    //     float displacement = noise(vec4(vec3(position), uTime * 1.));
-    //     vec3 pos = position;
-    //     pos.z = displacement * 2. + 2.;
-
-    //     gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
-    // }
-
     vUv = uv;
-    vPosition = position;
 
     #include <worldpos_vertex>
     #include <envmap_vertex>

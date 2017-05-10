@@ -15,7 +15,6 @@ class EventsManager {
         const listeners = EventsManager.eventsList[event];
 
         if(!listeners) {
-            console.warn('EventsManager :: Emit :: Currently no listeners for this event : ', event);
             return;
         }
 

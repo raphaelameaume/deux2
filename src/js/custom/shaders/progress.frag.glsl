@@ -16,7 +16,6 @@ uniform float uHeight;
 uniform float uLength;
 uniform float uProgress;
 
-varying vec3 vPosition;
 varying vec2 vUv;
 
 #include <common>
@@ -72,9 +71,6 @@ void main() {
     #include <envmap_fragment>
 
     vec4 color = vec4(outgoingLight, diffuseColor.a );
-
-    // float posX = vPosition.x * uStripeOrientation.x + vPosition.y * uStripeOrientation.y;
-    // float posY = vPosition.x * uStripeOrientation.y + vPosition.y * uStripeOrientation.x;
 
     float absX = floor(-cos((uTime * 0.1 + M_PI * uSquare.x * ( ( vUv.x + uProgress + 0.15 ) * 2. - 1. ) * 0.5))) + 1.;
     float absY = floor(-cos((M_PI * uSquare.y * ( vUv.y * 2. - 1. ) * 0.5))) + 1.;
