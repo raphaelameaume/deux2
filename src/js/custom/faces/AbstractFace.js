@@ -106,8 +106,6 @@ class AbstractFace extends THREE.Object3D {
     }
 
     invert () {
-        console.log('Invert');
-
         const tl = new TimelineLite();
 
         if ( this.blackMode ) {
