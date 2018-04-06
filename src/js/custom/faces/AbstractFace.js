@@ -46,9 +46,7 @@ class AbstractFace extends THREE.Object3D {
             // fragmentShader: require('../shaders/bottom.frag.glsl'),
             fragmentShader: require('../shaders/progress.frag.glsl'),
             uniforms: this.uniforms,
-            shading: THREE.FlatShading,
-            lights: true,
-            wireframe: false,
+            lights: false,
             side: side,
             transparent: true,
             fog: true,
@@ -176,9 +174,9 @@ class AbstractFace extends THREE.Object3D {
 
         tl.to(this.uniforms['uSquare'].value, this.duration, { x: x, y: y, ease: this.ease }, 0);
 
-        if ( invert && Math.random() > 0.9) {
-            tl.add(this.invert(), 0);
-        }
+        // if ( invert ) {
+        //     tl.add(this.invert(), 0);
+        // }
 
         return tl;
     }

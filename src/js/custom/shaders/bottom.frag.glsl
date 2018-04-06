@@ -45,31 +45,31 @@ void main() {
     #include <clipping_planes_fragment>
 
     vec4 diffuseColor = vec4( diffuse, opacity );
-    ReflectedLight reflectedLight = ReflectedLight( vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ) );
-    vec3 totalEmissiveRadiance = emissive;
+    // ReflectedLight reflectedLight = ReflectedLight( vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ) );
+    // vec3 totalEmissiveRadiance = emissive;
 
-    #include <logdepthbuf_fragment>
-    #include <map_fragment>
-    #include <color_fragment>
-    #include <alphamap_fragment>
-    #include <alphatest_fragment>
-    #include <specularmap_fragment>
-    #include <normal_flip>
-    #include <normal_fragment>
-    #include <emissivemap_fragment>
+    // #include <logdepthbuf_fragment>
+    // #include <map_fragment>
+    // #include <color_fragment>
+    // #include <alphamap_fragment>
+    // #include <alphatest_fragment>
+    // #include <specularmap_fragment>
+    // #include <normal_flip>
+    // #include <normal_fragment>
+    // #include <emissivemap_fragment>
 
     // accumulation
-    #include <lights_phong_fragment>
-    #include <lights_template>
+    // #include <lights_phong_fragment>
+    // #include <lights_template>
 
     // modulation
-    #include <aomap_fragment>
+    // #include <aomap_fragment>
 
-    vec3 outgoingLight = reflectedLight.directDiffuse + reflectedLight.indirectDiffuse + reflectedLight.directSpecular + reflectedLight.indirectSpecular + totalEmissiveRadiance;
+    // vec3 outgoingLight = reflectedLight.directDiffuse + reflectedLight.indirectDiffuse + reflectedLight.directSpecular + reflectedLight.indirectSpecular + totalEmissiveRadiance;
 
-    #include <envmap_fragment>
+    // #include <envmap_fragment>
 
-    vec4 color = vec4(outgoingLight, diffuseColor.a );
+    vec4 color = diffuseColor
 
     float posX = vPosition.x * uStripeOrientation.x + vPosition.y * uStripeOrientation.y;
     float posY = vPosition.x * uStripeOrientation.y + vPosition.y * uStripeOrientation.x;
@@ -94,8 +94,8 @@ void main() {
     
     gl_FragColor = color;
 
-    #include <tonemapping_fragment>
-    #include <encodings_fragment>
+    // #include <tonemapping_fragment>
+    // #include <encodings_fragment>
     #include <fog_fragment>
-    #include <premultiplied_alpha_fragment>
+    // #include <premultiplied_alpha_fragment>
 }

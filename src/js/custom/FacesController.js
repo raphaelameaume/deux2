@@ -4,6 +4,7 @@ import randomFromArray from './utils/randomFromArray';
 import lucky from './utils/lucky';
 import map from './utils/map';
 import debounce from './utils/debounce';
+import MidiController from './utils/MidiController';
 
 class FacesController {
 
@@ -21,12 +22,13 @@ class FacesController {
 
         this.time = 0.0;
         this.speed = 0.0;
-        this.speedContainer = 0.0;
+        this.speedContainer = 0;
         this.factor = 1.0;
         this.isSpaceDown = false;
         this.firstSpaceUp = false;
         this.highkicked = 0;
         this.lowkicked = 0;
+        this.direction = 1;
 
         // on events
         this.onLowKick = ::this.onLowKick;
@@ -52,9 +54,6 @@ class FacesController {
         this.blackModes = [
             this.blackModeVertical,
             this.blackModeHorizontal,
-            this.blackModeBottom,
-            this.blackModeTunnelTop,
-            this.blackModeTunnelBottom,
             this.blackModeFull,
         ];
 
@@ -86,10 +85,6 @@ class FacesController {
         EventsManager.on(Events.SOUNDS.HIGHKICK, this.onHighKick);
         EventsManager.on(Events.SOUNDS.TREMOLO, this.onTremolo);
         EventsManager.on(Events.SOUNDS.END, this.onSoundEnd);
-        EventsManager.on(Events.UI.HIDDEN, this.onUIHidden);
-        EventsManager.on(Events.KEYBOARD.SPACEDOWN, this.onSpaceDown);
-        EventsManager.on(Events.KEYBOARD.SPACEUP, this.onSpaceUp);
-        EventsManager.on(Events.KEYBOARD.SPACEHOLD, this.onSpaceHold);
         EventsManager.on(Events.XP.START, this.onStart);
 
         // this.updateDivisions = debounce(this.updateDivisions, 400);
@@ -97,6 +92,42 @@ class FacesController {
         // this.setBlackMode = debounce(this.setBlackMode, 400);
 
         this.updateDivisions();
+
+        MidiController.onPadDown(1, () => {
+            this.updateDivisions();
+        });
+
+        MidiController.onPadDown(2, () => {
+            this.changeScale();
+        });
+
+        MidiController.onPadDown(3, () => {
+            this.setBlackMode();
+        });
+
+        MidiController.onPadDown(4, () => {
+            this.speedContainer = -this.speedContainer;
+        });
+
+        MidiController.onPadDown(5, () => {
+            this.direction = -this.direction;
+        });
+
+        MidiController.onPadDown(6, () => {
+            Object.keys(this.faces).map( key => {
+                this.faces[key].invert();
+            });
+        });
+
+        MidiController.onKnobChange(1, ( value ) => {
+            const direction = this.speedContainer < 0 ? -1 : 1;
+
+            this.speedContainer = value * 2 * direction;
+        });
+
+        MidiController.onKnobChange(2, ( value ) => {
+            this.speed = value * 12;
+        })
     }
 
     register ( id, face ) {
@@ -397,7 +428,7 @@ class FacesController {
     }
 
     update () {
-        this.time += this.factor * this.speed * 0.1;
+        this.time += this.factor * this.speed * 0.1 * this.direction;
         this.container.rotation.z += this.factor * this.speedContainer * 0.005;
 
         this.faces['left'].update(this.time);

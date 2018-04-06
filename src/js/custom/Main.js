@@ -13,6 +13,8 @@ import KeyboardController from './controllers/KeyboardController';
 import EventsManager from './events/EventsManager';
 import Events from './events/Events';
 import UI from './ui';
+import MPKMini from './config/MPKMini';
+import MidiController from './utils/MidiController';
 
 const glslify = require('glslify');
 
@@ -25,14 +27,11 @@ class App {
 
 		this.backgroundColor = 0x000000;
 		
-		// this.gui = window.gui = new dat.GUI();
-        this.facesController = new FacesController();
-        this.facesContainer = this.facesController.container;
-        this.ui = new UI();
-
         MouseManager.start();
+        MidiController.start(MPKMini);
 
-        this.soundManager = new SoundManager();
+        this.facesController = new FacesController();
+
         this.keyboardController = new KeyboardController();
 			
 		this.resize = ::this.resize;
@@ -53,7 +52,7 @@ class App {
 		this.renderer.setSize(window.innerWidth, window.innerHeight);
 		this.renderer.setClearColor(this.backgroundColor);
 		// this.renderer.setPixelRatio(window.devicePixelRatio ? window.devicePixelRatio : 1);
-		this.renderer.shadowMap.enabled = true;
+		this.renderer.shadowMap.enabled = false;
 		this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 		
 		WAGNER.vertexShadersPath = 'js/vertex-shaders';
@@ -91,7 +90,7 @@ class App {
         this.scene = new THREE.Scene();
         this.scene.fog = new THREE.Fog(0x000000, 0.8, this.length * .98 );
 
-        this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 3000);
+        this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
         this.camera.position.z = 0;
         this.camera.lookAt(new THREE.Vector3());
         this.scene.add(this.camera);
@@ -111,6 +110,8 @@ class App {
         EventsManager.on(Events.UI.HIDDEN, this.onUIHidden);
         EventsManager.on(Events.SOUNDS.END, this.onSoundEnd);
         EventsManager.on(Events.XP.END, this.reset);
+
+        EventsManager.emit(Events.XP.START);
 	}
 
     reset () {
@@ -142,15 +143,16 @@ class App {
 	}
 
 	addLights () {
-		this.light = new THREE.AmbientLight(0xFFFFFF);
-		this.scene.add(this.light);
+        console.log('no lights');
+		// this.light = new THREE.AmbientLight(0xFFFFFF);
+		// this.scene.add(this.light);
 
-  		const pointLight3 = new THREE.PointLight( 0xffffff, 7.1, 0);
-  		pointLight3.position.x = 0
-  		pointLight3.position.y = 4;
-  		pointLight3.position.z = 60;
+  		// const pointLight3 = new THREE.PointLight( 0xffffff, 7.1, 0);
+  		// pointLight3.position.x = 0
+  		// pointLight3.position.y = 4;
+  		// pointLight3.position.z = 60;
 
-  		this.scene.add(pointLight3);
+  		// this.scene.add(pointLight3);
 	}
 
 	addElements () {
@@ -184,6 +186,7 @@ class App {
         this.top.rotation.z = Math.PI * 0.5;
 		this.top.position.y = this.height * 0.5;
         this.facesController.register('top', this.top);
+        console.log();
 
 		// this.background = new Background(this.backgroundGeometry, 0x000000);
 		// this.background.position.z = -this.length * 0.5;
@@ -200,8 +203,6 @@ class App {
     }
 
 	update () {
-        this.ui.update();
-        this.soundManager.update();
         this.facesController.update();
 
 		this.composer.reset();
