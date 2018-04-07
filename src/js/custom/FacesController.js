@@ -29,6 +29,8 @@ class FacesController {
         this.highkicked = 0;
         this.lowkicked = 0;
         this.direction = 1;
+        this.currentBlackMode = 0;
+        this.currentScaleMode = 0;
 
         // on events
         this.onLowKick = ::this.onLowKick;
@@ -295,7 +297,13 @@ class FacesController {
     }
 
     setBlackMode () {
-        const blackMode = randomFromArray(this.blackModes);
+        this.currentBlackMode++;
+
+        if ( this.currentBlackMode > this.blackModes.length - 1 ) {
+            this.currentBlackMode = 0;
+        }
+ 
+        const blackMode = this.blackModes[this.currentBlackMode];
         const options = blackMode();
 
         const tl = new TimelineMax();
@@ -366,7 +374,13 @@ class FacesController {
     }
 
     changeScale () {
-        const scale = randomFromArray(this.scalings);
+        this.currentScaleMode++
+
+        if ( this.currentScaleMode > this.scalings.length - 1 ) {
+            this.currentScaleMode = 0;
+        }
+
+        const scale = this.scalings[this.currentScaleMode];
 
         scale();
     }
