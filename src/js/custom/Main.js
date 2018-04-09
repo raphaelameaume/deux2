@@ -15,8 +15,9 @@ import Events from './events/Events';
 import UI from './ui';
 import MPKMini from './config/MPKMini';
 import MidiController from './utils/MidiController';
-
-const glslify = require('glslify');
+import Composer from './utils/postpro/Composer';
+import CustomPass from './utils/postpro/passes/CustomPass';
+import FXAAPass from './utils/postpro/passes/FXAAPass';
 
 class App {
 
@@ -58,7 +59,7 @@ class App {
 		WAGNER.vertexShadersPath = 'js/vertex-shaders';
 		WAGNER.fragmentShadersPath = 'js/fragment-shaders';
 
-		this.composer = new WAGNER.Composer(this.renderer);
+		this.composer = new Composer(this.renderer);
 		this.composer.setSize(window.innerWidth, window.innerHeight);
 
 		const bloomWidth = window.isTouch ? 256 : 512;
@@ -81,7 +82,28 @@ class App {
         this.vignettePass = new WAGNER.VignettePass();
         this.vignettePass.params.amount = 0.7;
         
-        this.fxaaPass = new WAGNER.FXAAPass();
+        // this.fxaaPass = new WAGNER.FXAAPass();
+
+        this.customPass = new CustomPass({
+            strength: 50,
+            blurAmount: 5,
+            applyZoomBlur: true,
+            zoomBlurStrength: { value: 3 },
+            zoomBlurCenter: new THREE.Vector2(0.5, 0.5),
+
+            splitDelta: { value: new THREE.Vector2(30, 30) },
+
+            noiseAmount: { value: 0.25 },
+            noiseSpeed: { value: 0.2 },
+
+            vignetteAmount: { value: 0.8 },
+            vignetteFallof: { value: 0.1 },
+
+            brightness: { value: 0.2 },
+            contrast: { value: 0.9 },
+        });
+
+        this.fxaaPass = new FXAAPass();
 
 		this.width = window.width = 60;
 		this.height = window.height = 60;
@@ -158,7 +180,7 @@ class App {
 	addElements () {
 		this.divisator = 2;
 
-        this.geometry = new THREE.PlaneGeometry(this.length, this.width, 32, 32);
+        this.geometry = new THREE.PlaneGeometry(this.length, this.width, 1, 1);
         this.otherGeometry = new THREE.PlaneGeometry(this.width, this.length, 32, 32);
 
 		this.leftRightGeometry = new THREE.PlaneGeometry(this.length, this.height, Math.floor(this.length / this.divisator), Math.floor(this.height / this.divisator) );
@@ -186,7 +208,6 @@ class App {
         this.top.rotation.z = Math.PI * 0.5;
 		this.top.position.y = this.height * 0.5;
         this.facesController.register('top', this.top);
-        console.log();
 
 		// this.background = new Background(this.backgroundGeometry, 0x000000);
 		// this.background.position.z = -this.length * 0.5;
@@ -205,12 +226,16 @@ class App {
 	update () {
         this.facesController.update();
 
+        this.customPass.update();
+
 		this.composer.reset();
 		this.composer.render(this.scene, this.camera);
-        this.composer.pass(this.bloomPass);
-        this.composer.pass(this.rgbPass);
-        this.composer.pass(this.noisePass);
-        this.composer.pass(this.vignettePass);
+        // this.composer.pass(this.bloomPass);
+        // this.composer.pass(this.rgbPass);
+        // this.composer.pass(this.noisePass);
+        // this.composer.pass(this.vignettePass);
+        // this.composer.toScreen(this.fxaaPass);
+        this.composer.pass(this.customPass);
         this.composer.toScreen(this.fxaaPass);
 
 		// this.renderer.render(this.scene, this.camera);
