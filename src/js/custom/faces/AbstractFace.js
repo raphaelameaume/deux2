@@ -32,7 +32,7 @@ class AbstractFace extends THREE.Object3D {
         this.orientations = [];
         this.duration = 0.3;
         this.factor = 1;
-        this.ease = Expo.easeInOut;
+        this.ease = Expo.easeOut;
         this.debug = false;
         this.started = false;
         this.isSpaceDown = false;
