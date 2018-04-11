@@ -11,7 +11,8 @@
     "start": "npm run dev",
     "dev": "gulp build --watch",
     "prod": "gulp build --production",
-    "webpack": "webpack --colors --watch"
+    "webpack": "webpack --colors --watch",
+    "serve": "http-server -p 3002"
   },
   "author": "Akufen",
   "devDependencies": {

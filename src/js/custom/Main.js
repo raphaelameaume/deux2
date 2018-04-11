@@ -91,7 +91,7 @@ class App {
             zoomBlurStrength: { value: 3 },
             zoomBlurCenter: new THREE.Vector2(0.5, 0.5),
 
-            splitDelta: { value: new THREE.Vector2(30g, 30g) },
+            splitDelta: { value: new THREE.Vector2(30, 30) },
 
             noiseAmount: { value: 0.25 },
             noiseSpeed: { value: 0.2 },
