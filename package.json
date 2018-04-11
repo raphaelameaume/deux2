@@ -12,7 +12,7 @@
     "dev": "gulp build --watch",
     "prod": "gulp build --production",
     "webpack": "webpack --colors --watch",
-    "serve": "http-server -p 3002"
+    "serve": "http-server -p 3003"
   },
   "author": "Akufen",
   "devDependencies": {
